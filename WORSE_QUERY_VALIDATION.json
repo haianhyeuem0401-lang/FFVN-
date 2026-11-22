@@ -1,0 +1,24 @@
+{
+  "validation_date": "2026-11-12",
+  "policy_cases_passed": 24,
+  "objective_c_semantic_checks": "PASS using libclang 19 and iPhoneOS16.5 SDK with warnings as errors",
+  "objective_c_modules": [
+    "FFWorseQuery.m",
+    "FFKernelExploit.m",
+    "vendor/worse_query/worse_query.m",
+    "FFDarkSupport.m"
+  ],
+  "main_variants": [
+    "online",
+    "dark",
+    "match-state",
+    "offline"
+  ],
+  "powershell_parse_files": 6,
+  "python_and_plist_syntax": "PASS",
+  "original_payload_integrity": "PASS: 7 original cache/game/image payloads unchanged",
+  "full_windows_build": "NOT RUN: original donor IPA and Windows toolchain not supplied",
+  "device_runtime": "NOT TESTED: no iOS device connected",
+  "signed_ipa": "NOT PRODUCED",
+  "upstream_commit": "d1540e20cd82b974d891e0551ced6d6aeb570ac2"
+}

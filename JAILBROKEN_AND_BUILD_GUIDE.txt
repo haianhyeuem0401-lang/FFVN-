@@ -1,0 +1,65 @@
+> **2026-11-12 update:** iOS 26/27 container access now uses the bundled worse_query backend. Read `FILZA_WORSE_QUERY_README.md` for the exact version/build gate and required App Group signing. Earlier kernel-support notes below describe the optional legacy backend.
+
+# FF Cache Manager — Jailbroken install + build guide
+
+## 1) Jailbroken devices (iOS 15/16: palera1n, Dopamine, XinaA15, ...)
+
+The app detects an unsandboxed install automatically and skips the kernel
+exploit entirely (the kernel chain is what fails on some devices/versions).
+
+To make it run unsandboxed on a jailbroken device, sign the IPA with the
+jailbroken entitlements:
+
+- ESign: Import `FFCacheManager-CLEAN.ipa` → Signing Options → Entitlements →
+  load `entitlements-jailbroken.plist` from this folder.
+- Other signers: use the same plist as the entitlements file.
+
+Result: the app reads/writes the game container directly (like real Filza).
+BODY / DRAG / NECK / CHEST / MAGIC / HOLOGRAM GUN / SKIN HOLO all work with no
+kernel exploit and no waiting.
+
+NOTE: on NON-jailbroken devices keep the normal signature (no-sandbox is
+ignored there anyway, and the kernel/MCM path is used).
+
+## 2) How the IPA is built (Windows)
+
+The build is fully automated by `build_clean.ps1`:
+
+```powershell
+$env:FF_SDK = "C:\...\iPhoneOS14.5.sdk"      # iOS 14.5 SDK path
+$env:FF_CLANG = "C:\...\llvm-mingw\bin\clang.exe"
+powershell -ExecutionPolicy Bypass -File .\build_clean.ps1
+```
+
+Requirements:
+- Python with `pip install pillow lief`
+- clang + ld64.lld + llvm-strip (llvm-mingw)
+- iPhoneOS14.5.sdk
+- `donors\FilzaSlop_1.0.3.ipa` (bridge donor)
+- `resources\brand.png` (app icon)
+- `resources\shaders\*.3D` (the two bundled shaders)
+
+Outputs:
+- `dist\clean\FFCacheManager-CLEAN.ipa`        (easy name)
+- `dist\clean\FFCacheManager-5.6.2-4-CLEAN-<hash>.ipa`
+- `dist\clean\release_manifest.json`           (integrity hashes → server)
+
+After any code change you MUST also deploy the new `release_manifest.json`
+build-4 hashes to `/etc/ffcache-release-manifest.json` on the activation
+server and restart `ffcache-activation`, otherwise the app is rejected with
+"Application integrity verification failed".
+
+## 3) iOS 27.0.1 status (kernel exploit)
+
+The 3105/OGIOS kernel chain only ships verified offset tables up to 26.0.x.
+There is no verified 27.x offset table in the public sources (0xjohnnydev/3105
+and related repos). Public "iOS 27 jailbreak" repos found on GitHub are
+research/demo material (Hexacon 2026 demo trackers, usbliter8 tether kits),
+NOT installable production jailbreaks.
+
+So on iOS 27.0.1:
+- The app works for activation/UI, but kernel-level container write access
+  depends on the exploit; without a real 27.x offset table it will fail-safe
+  (no file changes).
+- Recommended: use the app on iOS 15/16 (jailbroken, entitlements above) or
+  iOS 17.0-18.7.x / 26.0.x where the offset tables are verified.
